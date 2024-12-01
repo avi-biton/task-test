@@ -8,7 +8,7 @@ metadata:
     tekton.dev/pipelines.minVersion: "0.1"
     tekton.dev/tags: echo, task, test
     artifacthub.io/provider: Avi
-    artifacthub.io/category: Test category
+    artifacthub.io/category: integration-delivery
 spec:
   params:
     - name: str
