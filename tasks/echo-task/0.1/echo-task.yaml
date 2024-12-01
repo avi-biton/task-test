@@ -3,6 +3,12 @@ apiVersion: tekton.dev/v1
 kind: Task
 metadata:
   name: echo-task
+  annotations:
+    tekton.dev/displayName: Echo Task Test
+    tekton.dev/pipelines.minVersion: "0.1"
+    tekton.dev/tags: echo, task, test
+  labels:
+    app.kubernetes.io/version: "0.1"  
 spec:
   params:
     - name: str
