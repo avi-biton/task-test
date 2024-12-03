@@ -1,0 +1,32 @@
+---
+apiVersion: tekton.dev/v1
+kind: Task
+metadata:
+  name: echo-task
+  annotations:
+    tekton.dev/displayName: Echo Task Test
+    tekton.dev/pipelines.minVersion: "0.2"
+    tekton.dev/tags: echo, task, test
+    artifacthub.io/provider: Avi
+    artifacthub.io/category: integration-delivery
+  labels:
+    app.kubernetes.io/version: v0.2
+spec:
+  description: >-
+    Echo task for tests v2
+  params:
+    - name: str
+      type: string
+      description: String to echo
+  steps:
+    - name: echo
+      image: registry.access.redhat.com/ubi9/ubi@sha256:66233eebd72bb5baa25190d4f55e1dc3fff3a9b77186c1f91a0abdb274452072
+      env:
+        - name: STR
+          value: "$(params.str)"
+      script: |
+        #!/bin/bash
+        set -ex
+        set -o pipefail
+
+        echo "$(STR)"
