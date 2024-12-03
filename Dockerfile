@@ -2,7 +2,7 @@
 FROM scratch
 
 # Add Tekton resource YAMLs to the image
-COPY tasks/echo-task-bundle/0.1/echo-task-bundle.yaml echo-task-bundle.yaml
+COPY tasks/echo-task/0.1/echo-task.yaml echo-task.yaml
 
 # Specify the Tekton bundle label
 LABEL tekton.dev/bundle=1
