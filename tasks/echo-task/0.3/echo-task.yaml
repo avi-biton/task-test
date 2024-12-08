@@ -5,35 +5,21 @@ metadata:
   name: echo-task
   annotations:
     tekton.dev/displayName: Echo Task Test
-    tekton.dev/pipelines.minVersion: "0.2"
+    tekton.dev/pipelines.minVersion: "0.3"
     tekton.dev/tags: echo, task, test
     artifacthub.io/provider: Avi
     artifacthub.io/category: integration-delivery
   labels:
-    app.kubernetes.io/version: v0.2
+    app.kubernetes.io/version: v0.3
 spec:
   description: >-
-    Echo task for tests v2
-  params:
-    - name: str
-      type: string
-      description: String to echo
+    Echo task for tests v0.3
   steps:
     - name: echo
       image: registry.access.redhat.com/ubi9/ubi@sha256:66233eebd72bb5baa25190d4f55e1dc3fff3a9b77186c1f91a0abdb274452072
-      volumeMounts:
-        - name: workdir
-          mountPath: "$(params.workdir)"
-        - name: trusted-ca
-          mountPath: /etc/pki/tls/certs/ca-custom-bundle.crt
-          subPath: ca-bundle.crt
-          readOnly: true
-      env:
-        - name: STR
-          value: "$(params.str)"
       script: |
         #!/bin/bash
         set -ex
         set -o pipefail
 
-        echo "$(STR)"
+        echo "This is an echo test"
