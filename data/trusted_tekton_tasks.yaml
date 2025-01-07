@@ -1,0 +1,14 @@
+---
+trusted_tasks:
+  oci://quay.io/avi_test/catalog/task-echo-task:0.1:
+    - effective_on: "2025-02-06T00:00:00Z"
+      ref: sha256:2f1b55cf199d29fda9015b859b09a0ee093d74b9619e993765c9646a31437e35
+  oci://quay.io/avi_test/catalog/task-echo-task:0.2:
+    - effective_on: "2025-02-06T00:00:00Z"
+      ref: sha256:d51d408840cbed9cc97cb7e251819e50a573de6671a708258d22b9668515ffe4
+  oci://quay.io/avi_test/catalog/task-echo-task:0.3:
+    - effective_on: "2025-02-06T00:00:00Z"
+      ref: sha256:5e05fbf5fd67df87d1fba0ac4a5517f6165bf36949ad37bd60b99c1dbc9cd947
+  oci://quay.io/avi_test/catalog/task-yet-another-task:0.1:
+    - effective_on: "2025-02-06T00:00:00Z"
+      ref: sha256:94ad76f38518a928efb23651ad46765e1c6e102475c3f8114a776ca5e465a477
