@@ -51,26 +51,26 @@ spec:
         workspaces:
         - name: output
           workspace: workspace
-      # - name: build-utils
-      #   runAfter:
-      #     - fetch-repository
-      #   params:
-      #     - name: IMAGE
-      #       value: quay.io/avi_test/user-ns2/pull-request-builds:utils-{{revision}}
-      #     - name: CONTEXT
-      #       value: utils
-      #   taskRef:
-      #     params:
-      #     - name: name
-      #       value: buildah
-      #     - name: bundle
-      #       value: quay.io/redhat-appstudio-tekton-catalog/task-buildah:0.2@sha256:808be6da05864bf123a3cdaaab72701d08b27032804ed8df65e86ca0949e417c
-      #     - name: kind
-      #       value: task
-      #     resolver: bundles
-      #   workspaces:
-      #     - name: source
-      #       workspace: workspace
+      - name: build-utils
+        runAfter:
+          - fetch-repository
+        params:
+          - name: IMAGE
+            value: quay.io/avi_test/user-ns2/release-catalog:utils-{{revision}}
+          - name: CONTEXT
+            value: utils
+        taskRef:
+          params:
+          - name: name
+            value: buildah
+          - name: bundle
+            value: quay.io/redhat-appstudio-tekton-catalog/task-buildah:0.2@sha256:808be6da05864bf123a3cdaaab72701d08b27032804ed8df65e86ca0949e417c
+          - name: kind
+            value: task
+          resolver: bundles
+        workspaces:
+          - name: source
+            workspace: workspace
       - name: build-bundles
         runAfter:
           - fetch-repository
@@ -90,7 +90,7 @@ spec:
               type: string
           steps:
             - name: build-bundles            
-              image: quay.io/avi_test/utils:latest
+              image: quay.io/avi_test/user-ns2/release-catalog:utils-{{revision}}
               workingDir: $(workspaces.source.path)/source
               command: ["./hack/build-and-push.sh"]
               env:
@@ -121,7 +121,7 @@ spec:
                 #!/bin/bash
                 set -euo pipefail
                 set -ex
-                DATA_BUNDLE_REPO=quay.io/avi_test/user-ns2/data-acceptable-bundles
+                DATA_BUNDLE_REPO=quay.io/avi_test/user-ns2/release-catalog/data-acceptable-bundles
                 DATA_BUNDLE_TAG=$(date '+%s')
                 export DATA_BUNDLE_REPO DATA_BUNDLE_TAG
 
