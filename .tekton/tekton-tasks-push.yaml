@@ -89,7 +89,9 @@ spec:
             - name: e2e_test_namespace
               type: string
           steps:
-            - name: build-bundles            
+            - name: build-bundles
+              runAfter: 
+                - build-utils                          
               image: quay.io/avi_test/user-ns2/release-catalog:utils-{{revision}}
               workingDir: $(workspaces.source.path)/source
               command: ["./hack/build-and-push.sh"]
