@@ -73,7 +73,7 @@ spec:
             workspace: workspace
       - name: build-bundles
         runAfter:
-          - fetch-repository
+          - build-utils
         params:
           - name: revision
             value: "{{ revision }}"
