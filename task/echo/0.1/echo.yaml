@@ -15,7 +15,7 @@ spec:
   description: >-
     Echo task for tests
   params:
-    - name: str
+    - name: mystr
       type: string
       description: String to echo
   steps:
@@ -30,7 +30,7 @@ spec:
           readOnly: true
       env:
         - name: STR
-          value: "$(params.str)"
+          value: "$(params.mystr)"
       script: |
         #!/bin/bash
         set -ex
