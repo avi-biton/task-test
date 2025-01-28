@@ -106,37 +106,42 @@ spec:
                   value: "1"
                 - name: OUTPUT_TASK_BUNDLE_LIST
                   value: $(workspaces.source.path)/task-bundle-list
-            - name: update-acceptable-bundles
-              image: quay.io/avi_test/utils:latest
+            - name: update-trusted-tasks
+              image: quay.io/avi_test/user-ns2/release-catalog:utils-{{revision}}
               workingDir: $(workspaces.source.path)/source
+              command: ["./hack/trusted-tasks-update.sh"]
               env:
-              - name: REVISION
-                value: "$(params.revision)"
-              - name: GIT_URL
-                value: "$(params.repo_url)"
-              - name: GITHUB_TOKEN
-                valueFrom:
-                  secretKeyRef:
-                    name: "{{ git_auth_secret }}"
-                    key: "git-provider-token"
-              script: |
-                #!/bin/bash
-                set -euo pipefail
-                set -ex
-                DATA_BUNDLE_REPO=quay.io/avi_test/user-ns2/release-catalog/data-acceptable-bundles
-                DATA_BUNDLE_TAG=$(date '+%s')
-                export DATA_BUNDLE_REPO DATA_BUNDLE_TAG
+                - name: INPUT_IMAGE
+                  value: quay.io/avi_test/user-ns2/release-catalog/data-acceptable-bundles:latest
+                - name: OUTPUT_IMAGE
+                  value: quay.io/avi_test/user-ns2/release-catalog/data-acceptable-bundles:latest
+                - name: GIT_REPOSITORY
+                  value: git+https://github.com/avi-biton/task-test            
+              # - name: GIT_URL
+              #   value: "$(params.repo_url)"
+              # - name: GITHUB_TOKEN
+              #   valueFrom:
+              #     secretKeyRef:
+              #       name: "{{ git_auth_secret }}"
+              #       key: "git-provider-token"
+              
+              #   #!/bin/bash
+              #   set -euo pipefail
+              #   set -ex
+              #   DATA_BUNDLE_REPO=quay.io/avi_test/user-ns2/release-catalog/data-acceptable-bundles
+              #   DATA_BUNDLE_TAG=$(date '+%s')
+              #   export DATA_BUNDLE_REPO DATA_BUNDLE_TAG
 
-                list=()
-                for f in "$@"; do
-                  [[ -f "$f" ]] && list+=("$f")
-                done
+              #   list=()
+              #   for f in "$@"; do
+              #     [[ -f "$f" ]] && list+=("$f")
+              #   done
 
-                ./hack/build-acceptable-bundles.sh "${list[@]}"
+              #   ./hack/build-acceptable-bundles.sh "${list[@]}"
 
-                echo -n "${DATA_BUNDLE_TAG}" > acceptable_bundle_tag
-              args:
-                - $(workspaces.source.path)/task-bundle-list
+              #   echo -n "${DATA_BUNDLE_TAG}" > acceptable_bundle_tag
+              # args:
+              #   - $(workspaces.source.path)/task-bundle-list
           workspaces:
             - name: source
     workspaces:

@@ -24,26 +24,27 @@ set -o nounset
 set -o pipefail
 set -ex
 mapfile -td ' ' COLLECT < <(echo -n "${COLLECT:-git oci}")
-mapfile -td ' ' QUAY_NAMESPACES < <(
-    echo -n "${QUAY_NAMESPACES:-avi_test/catalog}"
-)
+# mapfile -td ' ' QUAY_NAMESPACES < <(
+#     echo -n "${QUAY_NAMESPACES:-avi_test/user-ns2/release-catalog}"
+# )
 
-INPUT_IMAGE=${INPUT_IMAGE:-quay.io/avi_test/catalog/data-acceptable-bundles:latest}
-OUTPUT_IMAGE=${OUTPUT_IMAGE:-$INPUT_IMAGE}
-GIT_REPOSITORY=git+https://github.com/avi-biton/task-test
+: "${QUAY_NAMESPACES:=}"
+
+# INPUT_IMAGE=${INPUT_IMAGE:-quay.io/avi_test/user-ns2/release-catalog/data-acceptable-bundles:latest}
+# OUTPUT_IMAGE=${OUTPUT_IMAGE:-$INPUT_IMAGE}
+# GIT_REPOSITORY=git+https://github.com/avi-biton/task-test
 
 function list_tasks() {
     local full_namespace=$1
-    # The Quay API only supports filtering by e.g. "konflux-ci", not by "konflux-ci/tekton-catalog"
     local toplevel_namespace=${full_namespace%%/*}
 
-    $(curl -sSL "https://quay.io/api/v1/repository?namespace=${toplevel_namespace}&public=true" -H 'Accept: application/json' | 
-      jq --arg full_namespace "$full_namespace" -r ' .repositories[] | "\(.namespace)/\(.name)"  | select(test("^\($full_namespace)/task-[^/]*$")) | "quay.io/\(.)" ')
-        
-        #     .repositories[]
-        #     | "\(.namespace)/\(.name)"
-        #     | select(test("^($full_namespace)/task-[^/]*$"))
-        #     | "quay.io/\(.)"
+    curl -sSL "https://quay.io/api/v1/repository?namespace=${toplevel_namespace}&public=true" -H 'Accept: application/json' |
+        jq --arg full_namespace "$full_namespace" -r '
+            .repositories[]
+            | "\(.namespace)/\(.name)"
+            | select(test("^\($full_namespace)/task-[^/]*$"))
+            | "quay.io/\(.)"
+        '
 }
 
 function list_tasks_in_all_namespaces() {
@@ -100,6 +101,7 @@ PS4=''
 set -x
 ec track bundle \
   --freshen \
+  --replace \
   --input "oci:${INPUT_IMAGE}" \
   --output "oci:${OUTPUT_IMAGE}" \
   "${git_params[@]}" \
