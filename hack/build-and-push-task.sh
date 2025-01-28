@@ -34,16 +34,21 @@
 
 set -ex -o pipefail
 
-VCS_URL=https://github.com/avi-biton/task-test
+
+# VCS_URL=https://github.com/avi-biton/task-test
 VCS_REF=$(git rev-parse HEAD)
 
 declare -r ARTIFACT_TYPE_TEXT_XSHELLSCRIPT="text/x-shellscript"
-declare -r ANNOTATION_TASK_MIGRATION="dev.konflux-ci.task.migration"
+# declare -r ANNOTATION_TASK_MIGRATION="dev.konflux-ci.task.migration"
 declare -r TEST_TASKS=${TEST_TASKS:-""}
 
-# QUAY_NAMESPACE=avi_test/user-ns2/release-catalog 
-# # TEST_REPO_NAME=pull-request-builds 
+# QUAY_NAMESPACE=avi_test/user-ns2
+# TEST_REPO_NAME=pull-request-tasks-bundles
+# OUTPUT_IMAGE=quay.io/avi_test/user-ns2/pull-request-tasks-bundles/echo-task-v01:on-pr-12345
 # BUILD_TAG=12345
+# CONTEXT=task/echo/0.1
+
+# QUAY_NAMESPACE=${OUTPUT_IMAGE}
 
 AUTH_JSON="$HOME/Downloads/abiton1-auth.json"
 # if [ -e "$XDG_RUNTIME_DIR/containers/auth.json" ]; then
@@ -61,33 +66,33 @@ function is_official_repo() {
     #   quay.io/redhat-appstudio-tekton-catalog/.*
     #   konflux-ci/tekton-catalog
     #   quay.io/konflux-ci/tekton-catalog/.*
-    grep -Eq '^(quay\.io/)?(avi_test/user-ns2)(/.*)?$' <<< "$1"
+    grep -Eq '^(quay\.io/)?(avi_test/catalog)(/.*)?$' <<< "$1"
 }
 
-function should_skip_repo() {
-    local -r quay_namespace="$1"
-    local -r repo_name="$2"
+# function should_skip_repo() {
+#     local -r quay_namespace="$1"
+#     local -r repo_name="$2"
 
-    # only skip repos in the redhat-appstudio-tekton-catalog namespace
-    if [ "$quay_namespace" != redhat-appstudio-tekton-catalog ]; then
-        return 1
-    fi
+#     # only skip repos in the redhat-appstudio-tekton-catalog namespace
+#     if [ "$quay_namespace" != redhat-appstudio-tekton-catalog ]; then
+#         return 1
+#     fi
 
-    local http_code
-    http_code=$(
-        curl -I -s -L -w "%{http_code}\n" -o /dev/null "https://quay.io/v2/${quay_namespace}/${repo_name}/tags/list"
-    )
+#     local http_code
+#     http_code=$(
+#         curl -I -s -L -w "%{http_code}\n" -o /dev/null "https://quay.io/v2/${quay_namespace}/${repo_name}/tags/list"
+#     )
 
-    # and only skip them if they don't already exist
-    [ "$http_code" != "200" ]
-}
+#     # and only skip them if they don't already exist
+#     [ "$http_code" != "200" ]
+# }
 
 # local dev build script
 SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 cd "$SCRIPTDIR/.." || exit 1
 
-WORKDIR=$(mktemp -d --suffix "-$(basename "${BASH_SOURCE[0]}" .sh)")
-declare -r WORKDIR
+# WORKDIR=$(mktemp -d --suffix "-$(basename "${BASH_SOURCE[0]}" .sh)")
+# declare -r WORKDIR
 
 retry() {
     local status
@@ -142,21 +147,21 @@ function escape_tkn_bundle_arg() {
 
 # NOTE: the "namespace" here can be ${organization}/${subpath}, e.g. konflux-ci/tekton-catalog
 # That will result in bundles being pushed to quay.io/konflux-ci/tekton-catalog/* repos
-if [ -z "$QUAY_NAMESPACE" ]; then
-    echo "QUAY_NAMESPACE is not set, skip this build."
-    exit 0
-fi
-if [ -z "$BUILD_TAG" ]; then
-    if is_official_repo "$QUAY_NAMESPACE"; then
-        echo "'${QUAY_NAMESPACE}' repo is used, define BUILD_TAG"
-        exit 1
-    else
-        # At the step of converting tasks to Tekton catalog, this is only
-        # applied to non-task resources.
-        BUILD_TAG=$(date +"%Y-%m-%d-%H%M%S")
-        echo "BUILD_TAG is not defined, using $BUILD_TAG"
-    fi
-fi
+# if [ -z "$QUAY_NAMESPACE" ]; then
+#     echo "QUAY_NAMESPACE is not set, skip this build."
+#     exit 0
+# fi
+# if [ -z "$BUILD_TAG" ]; then
+#     if is_official_repo "$QUAY_NAMESPACE"; then
+#         echo "'${QUAY_NAMESPACE}' repo is used, define BUILD_TAG"
+#         exit 1
+#     else
+#         # At the step of converting tasks to Tekton catalog, this is only
+#         # applied to non-task resources.
+#         BUILD_TAG=$(date +"%Y-%m-%d-%H%M%S")
+#         echo "BUILD_TAG is not defined, using $BUILD_TAG"
+#     fi
+# fi
 
 # Specify TEST_REPO_NAME env var if you want to push all images to a single quay repository
 # (This method is used in PR testing)
@@ -169,51 +174,6 @@ OUTPUT_TASK_BUNDLE_LIST="${OUTPUT_TASK_BUNDLE_LIST-task-bundle-list}"
 rm -f "${OUTPUT_TASK_BUNDLE_LIST}"
 # rm -f "${OUTPUT_TASK_BUNDLE_LIST}" "${OUTPUT_PIPELINE_BUNDLE_LIST}"
 
-# Build appstudio-utils image
-# if [ "$SKIP_BUILD" == "" ]; then
-#     echo "Using $QUAY_NAMESPACE to push results "
-#     podman build -t "$APPSTUDIO_UTILS_IMG" "appstudio-utils/"
-#     podman push "$APPSTUDIO_UTILS_IMG"
-
-#     # This isn't needed during PR testing
-#     if [[ "$BUILD_TAG" != "latest" && -z "$TEST_REPO_NAME" ]]; then
-#         # tag with latest
-#         IMAGE_NAME="${APPSTUDIO_UTILS_IMG%:*}:latest"
-#         podman tag "$APPSTUDIO_UTILS_IMG" "$IMAGE_NAME"
-#         podman push "$IMAGE_NAME"
-#     fi
-
-# fi
-
-# GENERATED_PIPELINES_DIR=$(mktemp -d -p "$WORKDIR" pipelines.XXXXXXXX)
-# declare -r GENERATED_PIPELINES_DIR
-# oc kustomize --output "$GENERATED_PIPELINES_DIR" pipelines/
-
-# # Generate YAML files separately since pipelines for core services have same .metadata.name.
-# CORE_SERVICES_PIPELINES_DIR=$(mktemp -d -p "$WORKDIR" core-services-pipelines.XXXXXXXX)
-# declare -r CORE_SERVICES_PIPELINES_DIR
-# oc kustomize --output "$CORE_SERVICES_PIPELINES_DIR" pipelines/core-services/
-
-
-# inject_bundle_ref_to_pipelines() {
-#     local -r task_name=$1
-#     local -r task_version=$2
-#     local -r task_bundle_with_digest=$3
-#     local -r bundle_ref="{
-#         \"resolver\": \"bundles\",
-#         \"params\": [
-#             {\"name\": \"name\", \"value\": \"${task_name}\"},
-#             {\"name\": \"bundle\", \"value\": \"${task_bundle_with_digest}\"},
-#             {\"name\": \"kind\", \"value\": \"task\"}
-#         ]
-#     }"
-#     local -r task_selector="select(.name == \"${task_name}\" and .version == \"${task_version}\")"
-#     find "$GENERATED_PIPELINES_DIR" "$CORE_SERVICES_PIPELINES_DIR" -maxdepth 1 -type f -name '*.yaml' | \
-#         while read -r pipeline_file; do
-#             yq e "(.spec.tasks[].taskRef | ${task_selector}) |= ${bundle_ref}" -i "${pipeline_file}"
-#             yq e "(.spec.finally[].taskRef | ${task_selector}) |= ${bundle_ref}" -i "${pipeline_file}"
-#         done
-# }
 
 # Get task version from task definition rather than the version in the directory path.
 # Arguments: task_file
@@ -232,7 +192,7 @@ build_push_task() {
     local -r prepared_task_file=$2
     local -r task_bundle=$3
     local -r task_file_sha=$4
-    local -r has_migration=$5
+    # local -r has_migration=$5
 
     local -r task_description=$(yq e '.spec.description' "$prepared_task_file" | head -n 1)
 
@@ -254,9 +214,9 @@ build_push_task() {
     if [ -f "${task_dir}/USAGE.md" ]; then
         ANNOTATIONS+=("dev.tekton.docs.usage=${VCS_URL}/tree/${VCS_REF}/${task_dir}/USAGE.md")
     fi
-    if [ -n "$has_migration" ]; then
-        ANNOTATIONS+=("dev.konflux-ci.task.migration=true")
-    fi
+    # if [ -n "$has_migration" ]; then
+    #     ANNOTATIONS+=("dev.konflux-ci.task.migration=true")
+    # fi
 
     local -a ANNOTATION_FLAGS=()
     for annotation in "${ANNOTATIONS[@]}"; do
@@ -297,12 +257,12 @@ is_kustomized_task() {
 # by environment variable TEST_REPO_NAME for testing purpose.
 # Arguments: task_name, task_version
 # Task bundle reference is output to stdout.
-generate_tagged_task_bundle() {
-    local -r task_name=$1 task_version=$2
-    local -r repository=${TEST_REPO_NAME:-task-${task_name}}
-    local -r tag=${TEST_REPO_NAME:+${task_name}-}${task_version}
-    echo "quay.io/${QUAY_NAMESPACE}/${repository}:${tag}"
-}
+# generate_tagged_task_bundle() {
+#     local -r task_name=$1 task_version=$2
+#     local -r repository=${TEST_REPO_NAME:-task-${task_name}}
+#     local -r tag=${TEST_REPO_NAME:+${task_name}-}${task_version}
+#     echo "quay.io/${QUAY_NAMESPACE}/${repository}:${tag}"
+# }
 
 # Generate build data for a normal task. The data is output to stdout as
 # space-separated fields in a single line.
@@ -313,7 +273,7 @@ generate_normal_task_build_data() {
     local -r prepared_task_file="${WORKDIR}/${task_name}-${task_version}.yaml"
     cp "$task_file" "$prepared_task_file"
     local -r task_file_sha=$(git log -n 1 --pretty=format:%H -- "$task_file")
-    local -r task_bundle=$(generate_tagged_task_bundle "$task_name" "$task_version")
+    local -r task_bundle=${OUTPUT_IMAGE}
     echo "$prepared_task_file $task_file_sha $task_bundle"
 }
 
@@ -370,93 +330,27 @@ fetch_image_digest() {
     echo "$digest"
 }
 
-# Attach migration file to given task bundle.
-# Arguments: task_dir, concrete_task_version, task_bundle
-attach_migration_file() {
-    local -r task_dir=$1
-    local -r concrete_task_version=$2
-    local -r task_bundle=$3
-    local -r migration_file=$4
-
-    # Check if task bundle has an attached migration file.
-    local filename
-    local found=
-    local artifact_refs
-
-    # List attached artifacts, that have specific artifact type and annotation.
-    # Then, find out the migration artifact.
-    #
-    # Minimum version oras 1.2.0 is required for option --format
-    artifact_refs=$(
-        retry oras discover "$task_bundle" --artifact-type "$ARTIFACT_TYPE_TEXT_XSHELLSCRIPT" --format json | \
-        jq -r "
-            .manifests[]
-            | select(.annotations.\"${ANNOTATION_TASK_MIGRATION}\" == \"true\")
-            | .reference"
-    )
-    while read -r artifact_ref; do
-        if [ -z "$artifact_ref" ]; then
-            continue
-        fi
-        filename=$(
-            retry oras pull --format json "$artifact_ref" | jq -r "
-                .files[]
-                | select(.annotations.\"org.opencontainers.image.title\" == \"${concrete_task_version}.sh\")
-                | .annotations.\"org.opencontainers.image.title\"
-                "
-        )
-
-        if [ -n "$filename" ]; then
-            if diff "$filename" "$migration_file" >/dev/null; then
-                found=true
-                break
-            else
-                echo "error: task bundle $task_bundle has migration artifact $artifact_ref, but the migration content is different: $filename" 1>&2
-                exit 1
-            fi
-        fi
-    done <<<"$artifact_refs"
-
-    if [ -n "$found" ]; then
-        return 0
-    fi
-
-    (
-        cd "${migration_file%/*}"
-        retry oras attach \
-            --registry-config "$AUTH_JSON" \
-            --artifact-type "$ARTIFACT_TYPE_TEXT_XSHELLSCRIPT" \
-            --annotation "$ANNOTATION_TASK_MIGRATION=true" \
-            "$task_bundle" "${migration_file##*/}"
-    )
-
-    echo
-    echo "Attached migration file ${migration_file} to ${task_bundle}"
-
-    return 0
-}
-
-build_push_tasks() {
+prepare_and_push_task() {
     local build_data
     local task_bundle_with_digest
-    local migration_file
+    # local migration_file
     local prepared_task_file
     local task_file_sha
     local task_bundle
     local output
-    local has_migration
-
-    find task/*/* -maxdepth 0 -type d | awk -F '/' '{ print $0, $2, $3 }' | \
+    # local has_migration
+    
+    find $CONTEXT -maxdepth 0 -type d | awk -F '/' '{ print $0, $2, $3 }' | \
     while read -r task_dir task_name task_version
     do
-        if [ -n "$TEST_TASKS" ] && echo "$TEST_TASKS" | grep -qv "$task_name" 2>/dev/null; then
-            continue
-        fi
+        # if [ -n "$TEST_TASKS" ] && echo "$TEST_TASKS" | grep -qv "$task_name" 2>/dev/null; then
+        #     continue
+        # fi
 
-        if should_skip_repo "$QUAY_NAMESPACE" "task-${task_name}"; then
-            echo "NOTE: not pushing task-$task_name:$task_version to $QUAY_NAMESPACE; the repo does not exist and $QUAY_NAMESPACE is deprecated"
-            continue
-        fi
+        # if should_skip_repo "$QUAY_NAMESPACE" "task-${task_name}"; then
+        #     echo "NOTE: not pushing task-$task_name:$task_version to $QUAY_NAMESPACE; the repo does not exist and $QUAY_NAMESPACE is deprecated"
+        #     continue
+        # fi
 
         echo "info: build and push task $task_dir" 1>&2
 
@@ -473,12 +367,12 @@ build_push_tasks() {
         digest=$(fetch_image_digest "${task_bundle}-${task_file_sha}")
 
         concrete_task_version=$(get_concrete_task_version "$prepared_task_file")
-        migration_file="${task_dir}/migrations/${concrete_task_version}.sh"
+        # migration_file="${task_dir}/migrations/${concrete_task_version}.sh"
 
-        has_migration=false
-        if [ -f "$migration_file" ]; then
-            has_migration=yes
-        fi
+        # has_migration=false
+        # if [ -f "$migration_file" ]; then
+        #     has_migration=yes
+        # fi
 
         if [ -n "$digest" ]; then
             task_bundle_with_digest=${task_bundle}@${digest}
@@ -493,92 +387,19 @@ build_push_tasks() {
             cache_set "${task_bundle}-${task_file_sha}" "${task_bundle_with_digest#*@}"
         fi
 
-        if [ "$has_migration" == "yes" ]; then
-            attach_migration_file "$task_dir" "$concrete_task_version" "$task_bundle_with_digest" "$migration_file"
-        fi
+        # if [ "$has_migration" == "yes" ]; then
+        #     attach_migration_file "$task_dir" "$concrete_task_version" "$task_bundle_with_digest" "$migration_file"
+        # fi
 
         # version placeholder is removed naturally by the substitution.
-        echo "info: inject task bundle to pielines $task_bundle_with_digest" 1>&2
+        # echo "info: inject task bundle to pielines $task_bundle_with_digest" 1>&2
         real_task_name=$(yq e '.metadata.name' "$prepared_task_file")
         # inject_bundle_ref_to_pipelines "$real_task_name" "$task_version" "$task_bundle_with_digest"
+
+        echo "$task_bundle" > "${WORKDIR}/bundle"
+        image_ref=$(echo "$task_bundle_with_digest" | awk -F '@' '{print $2}')
+        echo "$image_ref" > "${WORKDIR}/ref"
     done
 }
 
-build_push_tasks
-
-
-# Used for build-definitions pull request CI only
-# if [ -n "$ENABLE_SOURCE_BUILD" ]; then
-#     for pipeline_yaml in "$GENERATED_PIPELINES_DIR"/*.yaml; do
-#         yq e '(.spec.params[] | select(.name == "build-source-image") | .default) = "true"' -i "$pipeline_yaml"
-#     done
-# fi
-
-# if [ "$QUAY_NAMESPACE" == redhat-appstudio-tekton-catalog ]; then
-#     echo "NOTE: not pushing any pipelines to $QUAY_NAMESPACE; the namespace is deprecated"
-#     exit 0
-# fi
-
-# Build Pipeline bundle with pipelines pointing to newly built task bundles
-# for pipeline_yaml in "$GENERATED_PIPELINES_DIR"/*.yaml "$CORE_SERVICES_PIPELINES_DIR"/*.yaml
-# do
-#     pipeline_name=$(yq e '.metadata.name' "$pipeline_yaml")
-#     pipeline_description=$(yq e '.spec.description' "$pipeline_yaml" | head -n 1)
-#     pipeline_dir="pipelines/${pipeline_name}/"
-#     core_services_ci=$(yq e '.metadata.annotations."appstudio.openshift.io/core-services-ci" // ""' "$pipeline_yaml")
-#     if [ "$core_services_ci" == "1" ]; then
-#         pipeline_name="core-services-${pipeline_name}"
-#         BUILD_TAG=latest
-#     fi
-
-#     repository=${TEST_REPO_NAME:-pipeline-${pipeline_name}}
-#     tag=${TEST_REPO_NAME:+${pipeline_name}-}$BUILD_TAG
-#     pipeline_bundle=quay.io/${QUAY_NAMESPACE}/${repository}:${tag}
-
-#     ANNOTATIONS=()
-#     ANNOTATIONS+=("org.opencontainers.image.source=${VCS_URL}")
-#     ANNOTATIONS+=("org.opencontainers.image.revision=${VCS_REF}")
-#     ANNOTATIONS+=("org.opencontainers.image.url=${VCS_URL}/tree/${VCS_REF}/${pipeline_dir}")
-#     # yq will return null if the element is missing.
-#     if [[ "${pipeline_description}" != "null" ]]; then
-#         ANNOTATIONS+=("org.opencontainers.image.description=${pipeline_description}")
-#     fi
-#     if [ -f "${pipeline_dir}README.md" ]; then
-#         ANNOTATIONS+=("org.opencontainers.image.documentation=${VCS_URL}/tree/${VCS_REF}/${pipeline_dir}README.md")
-#     fi
-#     if [ -f "${pipeline_dir}/TROUBLESHOOTING.md" ]; then
-#         ANNOTATIONS+=("dev.tekton.docs.troubleshooting=${VCS_URL}/tree/${VCS_REF}/${pipeline_dir}TROUBLESHOOTING.md")
-#     fi
-#     if [ -f "${pipeline_dir}/USAGE.md" ]; then
-#         ANNOTATIONS+=("dev.tekton.docs.usage=${VCS_URL}/tree/${VCS_REF}/${pipeline_dir}USAGE.md")
-#     fi
-
-#     ANNOTATION_FLAGS=()
-#     for annotation in "${ANNOTATIONS[@]}"; do
-#         ANNOTATION_FLAGS+=("--annotate" "$(escape_tkn_bundle_arg "$annotation")")
-#     done
-
-#     retry tkn bundle push "${ANNOTATION_FLAGS[@]}" "$pipeline_bundle" -f "${pipeline_yaml}" | \
-#         save_ref "$pipeline_bundle" "$OUTPUT_PIPELINE_BUNDLE_LIST"
-
-#     [ "$pipeline_name" == "docker-build" ] && docker_pipeline_bundle=$pipeline_bundle
-#     [ "$pipeline_name" == "docker-build-oci-ta" ] && docker_oci_ta_pipeline_bundle=$pipeline_bundle
-#     [ "$pipeline_name" == "docker-build-multi-platform-oci-ta" ] && docker_multi_platform_oci_ta_pipeline_bundle=$pipeline_bundle
-#     [ "$pipeline_name" == "fbc-builder" ] && fbc_pipeline_bundle=$pipeline_bundle
-#     if [ "$SKIP_DEVEL_TAG" == "" ] && is_official_repo "$QUAY_NAMESPACE" && [ -z "$TEST_REPO_NAME" ]; then
-#         NEW_TAG="${pipeline_bundle%:*}:devel"
-#         skopeo copy "docker://${pipeline_bundle}" "docker://${NEW_TAG}"
-#     fi
-# done
-
-# if [ "$SKIP_INSTALL" == "" ]; then
-#     rm -f bundle_values.env
-
-#     echo "export CUSTOM_DOCKER_BUILD_PIPELINE_BUNDLE=$docker_pipeline_bundle" >> bundle_values.env
-#     echo "export CUSTOM_DOCKER_BUILD_OCI_TA_PIPELINE_BUNDLE=$docker_oci_ta_pipeline_bundle" >> bundle_values.env
-#     echo "export CUSTOM_DOCKER_BUILD_MULTI_PLATFORM_OCI_TA_PIPELINE_BUNDLE=$docker_multi_platform_oci_ta_pipeline_bundle" >> bundle_values.env
-#     echo "export CUSTOM_FBC_BUILDER_PIPELINE_BUNDLE=$fbc_pipeline_bundle" >> bundle_values.env
-# fi
-
-
-# vim: set et sw=4 ts=4:
+prepare_and_push_task
