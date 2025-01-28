@@ -25,10 +25,10 @@ set -o pipefail
 set -ex
 mapfile -td ' ' COLLECT < <(echo -n "${COLLECT:-git oci}")
 mapfile -td ' ' QUAY_NAMESPACES < <(
-    echo -n "${QUAY_NAMESPACES:-avi_test/catalog}"
+    echo -n "${QUAY_NAMESPACES:-avi_test/user-ns2/release-catalog}"
 )
 
-INPUT_IMAGE=${INPUT_IMAGE:-quay.io/avi_test/catalog/data-acceptable-bundles:latest}
+INPUT_IMAGE=${INPUT_IMAGE:-quay.io/avi_test/user-ns2/release-catalog/data-acceptable-bundles:latest}
 OUTPUT_IMAGE=${OUTPUT_IMAGE:-$INPUT_IMAGE}
 GIT_REPOSITORY=git+https://github.com/avi-biton/task-test
 
@@ -38,7 +38,7 @@ function list_tasks() {
     local toplevel_namespace=${full_namespace%%/*}
 
     $(curl -sSL "https://quay.io/api/v1/repository?namespace=${toplevel_namespace}&public=true" -H 'Accept: application/json' | 
-      jq --arg full_namespace "$full_namespace" -r ' .repositories[] | "\(.namespace)/\(.name)"  | select(test("^\($full_namespace)/task-[^/]*$")) | "quay.io/\(.)" ')
+      jq --arg full_namespace "$full_namespace" -r ' .repositories[] | "\(.namespace)/\(.name)"  | select(test("^($full_namespace)/task-[^/]*$")) | "quay.io/\(.)" ')
         
         #     .repositories[]
         #     | "\(.namespace)/\(.name)"
