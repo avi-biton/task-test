@@ -25,7 +25,7 @@ mapfile -td ' ' COLLECT < <(echo -n "${COLLECT:-git oci}")
 # GIT_URL="https://github.com/avi-biton/task-test"
 # CONTEXT="task/echo/0.2"
 OUTPUT_IMAGE=$(echo ${IMAGE} | awk -F: '{sub(/:.*/, "/data-acceptable-bundles:latest"); print}')
-
+# SOURCE="/home/abiton/projects/task-test"
 
 git_params=""
 oci_params=""
@@ -33,10 +33,13 @@ for c in "${COLLECT[@]}"; do
   case "${c}" in
     git)
       echo -n Adding git Task reference
-      task_dir=${GIT_URL}//${CONTEXT}
+      # task_dir=${GIT_URL}//${CONTEXT}
+      task_dir=${SOURCE}/${CONTEXT}
+      [ ! -d ${task_dir} ] && { echo "Aborting: ${task_dir} is not a directory"; exit 1; }
       mapfile -td '/' dirparts < <(echo "${task_dir}")
-      task_file="${task_dir}/${dirparts[-2]}.yaml"
-      git_params=("--git=git+${task_file}")
+      task_file="${dirparts[-2]}.yaml"
+      [ ! -f "${task_dir}/${task_file}" ] && { echo "Aborting: ${task_file} does not exist"; exit 1; }
+      git_params=("--git=git+${GIT_URL}/${CONTEXT}/${task_file}")
       echo
       echo Collected git parameters:
       printf "%s\n" "${git_params}"
