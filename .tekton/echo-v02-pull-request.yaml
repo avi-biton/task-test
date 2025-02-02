@@ -39,7 +39,7 @@ spec:
           workspace: workspace
       taskSpec:
         steps:
-          - name: update-trustedt-tasks
+          - name: update-trusted-tasks
             image: quay.io/enterprise-contract/ec-cli:snapshot@sha256:47e326ef3248e0574c7e5388a799510dac014da66dee9ab23d957b396043467b
             workingDir: $(workspaces.source.path)/source
             command: ["./hack/trusted-tasks-update.sh"]
@@ -49,7 +49,9 @@ spec:
               - name: GIT_URL
                 value: "$(params.git-url)"
               - name: CONTEXT
-                value: $(params.path-context)    
+                value: $(params.path-context)
+              - name: SOURCE
+                value: "$(workspaces.source.path)/source"                
     - name: show-summary
       params:
       - name: pipelinerun-name
