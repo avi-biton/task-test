@@ -24,7 +24,7 @@ mapfile -td ' ' COLLECT < <(echo -n "${COLLECT:-git oci}")
 # IMAGE="quay.io/avi_test/user-ns2/pull-request-task-bundles/task-echo-v02:on-pr-e0c103f2aa15b14b9feff1b5922d0b50659316b8"
 # GIT_URL="https://github.com/avi-biton/task-test"
 # CONTEXT="task/echo/0.2"
-OUTPUT_IMAGE=$(echo ${IMAGE} | awk -F: '{sub(/:.*/, "/data-acceptable-bundles:latest"); print}')
+OUTPUT_IMAGE=$(echo ${IMAGE} | awk '{sub(":", "/data-acceptable-bundles:"); print}')
 # SOURCE="/home/abiton/projects/task-test"
 
 git_params=""
@@ -33,13 +33,12 @@ for c in "${COLLECT[@]}"; do
   case "${c}" in
     git)
       echo -n Adding git Task reference
-      # task_dir=${GIT_URL}//${CONTEXT}
       task_dir=${SOURCE}/${CONTEXT}
       [ ! -d ${task_dir} ] && { echo "Aborting: ${task_dir} is not a directory"; exit 1; }
       mapfile -td '/' dirparts < <(echo "${task_dir}")
       task_file="${dirparts[-2]}.yaml"
       [ ! -f "${task_dir}/${task_file}" ] && { echo "Aborting: ${task_file} does not exist"; exit 1; }
-      git_params=("--git=git+${GIT_URL}/${CONTEXT}/${task_file}")
+      git_params=("--git=git+${GIT_URL}//${CONTEXT}/${task_file}")
       echo
       echo Collected git parameters:
       printf "%s\n" "${git_params}"
