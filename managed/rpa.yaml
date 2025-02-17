@@ -11,7 +11,7 @@ spec:
   data:
     mapping:
       components:
-        - name: echo-v01-test2
+        - name: echo-v01
           repository: quay.io/avi_test/user-ns2/release-catalog
           tags:
             - latest
