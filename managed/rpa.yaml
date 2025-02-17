@@ -1,0 +1,30 @@
+---
+apiVersion: appstudio.redhat.com/v1alpha1
+kind: ReleasePlanAdmission
+metadata:
+  name: tasks
+  labels:
+    release.appstudio.openshift.io/auto-release: 'true'
+spec:
+  applications:
+    - tasks
+  data:
+    mapping:
+      components:
+        - name: echo-v01-test2
+          repository: quay.io/avi_test/user-ns2/release-catalog
+          tags:
+            - latest
+  origin: user-ns2
+  pipeline:
+    pipelineRef:
+      resolver: git
+      params:
+        - name: url
+          value: "https://github.com/konflux-ci/release-service-catalog.git"
+        - name: revision
+          value: 806af0c14399c7b2b4ef357e884d6cbcb255e5f9
+        - name: pathInRepo
+          value: "pipelines/push-to-external-registry/push-to-external-registry.yaml"
+    serviceAccountName: appstudio-pipeline
+  policy: default
