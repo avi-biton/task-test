@@ -21,40 +21,54 @@ set -ex
 
 mapfile -td ' ' COLLECT < <(echo -n "${COLLECT:-git oci}")
 
-# IMAGE="quay.io/avi_test/user-ns2/pull-request-task-bundles/task-echo-v02:on-pr-e0c103f2aa15b14b9feff1b5922d0b50659316b8"
+IMAGE="quay.io/avi_test/user-ns2/release-catalog/task-echo:0.2"
 # GIT_URL="https://github.com/avi-biton/task-test"
 # CONTEXT="task/echo/0.2"
-OUTPUT_IMAGE=$(echo ${IMAGE} | awk -F: '{sub(/:.*/, "/data-acceptable-bundles:latest"); print}')
-# SOURCE="/home/abiton/projects/task-test"
+TAG="latest"
+ACCEPTABLE_BUNDLES=$(echo ${IMAGE} | awk -F'/' '{OFS="/"; $NF="data-acceptable-bundles"; print}')
 
-git_params=""
-oci_params=""
-for c in "${COLLECT[@]}"; do
-  case "${c}" in
-    git)
-      echo -n Adding git Task reference
-      # task_dir=${GIT_URL}//${CONTEXT}
-      task_dir=${SOURCE}/${CONTEXT}
-      [ ! -d ${task_dir} ] && { echo "Aborting: ${task_dir} is not a directory"; exit 1; }
-      mapfile -td '/' dirparts < <(echo "${task_dir}")
-      task_file="${dirparts[-2]}.yaml"
-      [ ! -f "${task_dir}/${task_file}" ] && { echo "Aborting: ${task_file} does not exist"; exit 1; }
-      git_params=("--git=git+${GIT_URL}/${CONTEXT}/${task_file}")
-      echo
-      echo Collected git parameters:
-      printf "%s\n" "${git_params}"
-      ;;
-    oci)
-      echo -n Adding OCI Task bundle
-      oci_params=("--bundle=${IMAGE}")
-      echo
-      echo Collected OCI parameters:
-      printf "%s\n" "${oci_params}"
-  esac
-done
+# check if data-acceptable-bundles:latest artifact exists
+set +e
+skopeo list-tags docker://${ACCEPTABLE_BUNDLES} | jq -r '.Tags[]' | grep ${TAG} &> /dev/null
+RESULT=$?
+set -e
+if [ $RESULT -eq 0 ]; then
+  echo "Input image exists"
+  ec track bundle --freshen --bundle ${IMAGE} --input oci:${ACCEPTABLE_BUNDLES}:${TAG} --output oci:${ACCEPTABLE_BUNDLES}:${TAG}
+else
+  echo "Input image does not exist"
+  ec track bundle --freshen --bundle ${IMAGE} --output oci:${ACCEPTABLE_BUNDLES}:${TAG}
+fi
 
-echo Running:
-PS4=''
-set -x
-ec track bundle --freshen ${git_params} ${oci_params} --output oci:${OUTPUT_IMAGE}
+# git_params=""
+# oci_params=""
+# for c in "${COLLECT[@]}"; do
+#   case "${c}" in
+#     git)
+#       echo -n Adding git Task reference
+#       # task_dir=${GIT_URL}//${CONTEXT}
+#       task_dir=$(workspaces.source.path)/source/${CONTEXT}
+#       [ ! -d ${task_dir} ] && { echo "Aborting: ${task_dir} is not a directory"; exit 1; }
+#       mapfile -td '/' dirparts < <(echo "${task_dir}")
+#       task_file="${task_dir}/${dirparts[-2]}.yaml"
+#       [ ! -f "${task_file}" ] && { echo "Aborting: ${task_file} does not exist"; exit 1; }
+#       git_params=("--git=git+${GIT_URL}/${CONTEXT}/${task_file}")
+#       echo
+#       echo Collected git parameters:
+#       printf "%s\n" "${git_params}"
+#       ;;
+#     oci)
+#       echo -n Adding OCI Task bundle
+#       oci_params=("--bundle=${IMAGE}")
+#       echo
+#       echo Collected OCI parameters:
+#       printf "%s\n" "${oci_params}"
+#   esac
+# done
+
+# echo Running:
+# PS4=''
+# set -x
+# ec track bundle --freshen ${git_params} ${oci_params} --output oci:${OUTPUT_IMAGE}
   
+# ec track bundle --freshen --bundle ${IMAGE} --input oci:${INPUT_IMAGE} --output oci:${OUTPUT_IMAGE}
