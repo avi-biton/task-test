@@ -38,3 +38,4 @@ spec:
   
         echo "$(STR)"
         # comment
+        # and another comment
