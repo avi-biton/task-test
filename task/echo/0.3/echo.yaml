@@ -23,4 +23,3 @@ spec:
         set -o pipefail
 
         echo "This is an echo test"
-        # comment
