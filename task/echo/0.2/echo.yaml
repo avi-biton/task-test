@@ -37,4 +37,3 @@ spec:
         set -o pipefail
 
         echo "$(STR)"
-        # another comment
