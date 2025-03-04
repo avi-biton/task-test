@@ -36,5 +36,5 @@ spec:
         set -ex
         set -o pipefail
   
-        echo "$(STR)"
+        echo "${STR}"
         # comment
