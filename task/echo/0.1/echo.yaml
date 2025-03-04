@@ -22,8 +22,8 @@ spec:
     - name: echo
       image: registry.access.redhat.com/ubi9/ubi@sha256:66233eebd72bb5baa25190d4f55e1dc3fff3a9b77186c1f91a0abdb274452072
       volumeMounts:
-        - name: workdir
-          mountPath: "$(params.workdir)"
+        # - name: workdir
+        #   mountPath: "$(params.workdir)"
         - name: trusted-ca
           mountPath: /etc/pki/tls/certs/ca-custom-bundle.crt
           subPath: ca-bundle.crt
@@ -38,4 +38,3 @@ spec:
   
         echo "$(STR)"
         # comment
-        # and another comment
