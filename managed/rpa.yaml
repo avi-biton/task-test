@@ -3,6 +3,7 @@ apiVersion: appstudio.redhat.com/v1alpha1
 kind: ReleasePlanAdmission
 metadata:
   name: tasks
+  namespace: managed-ns2
   labels:
     release.appstudio.openshift.io/auto-release: 'true'
 spec:
@@ -11,10 +12,23 @@ spec:
   data:
     mapping:
       components:
-        - name: echo-v01
-          repository: quay.io/avi_test/user-ns2/release-catalog
-          tags:
-            - latest
+      - name: echo-v01
+        repository: quay.io/avi_test/user-ns2/release-catalog/task-echo
+        tags:
+        - "0.1"
+      - name: echo-v02
+        repository: quay.io/avi_test/user-ns2/release-catalog/task-echo
+        tags:
+        - "0.2"
+      - name: echo-v03
+        repository: quay.io/avi_test/user-ns2/release-catalog/task-echo
+        tags:
+        - "0.3"
+      - name: yet-another-v01
+        repository: quay.io/avi_test/user-ns2/release-catalog/yet-another
+        tags:
+        - "0.1"
+
   origin: user-ns2
   pipeline:
     pipelineRef:

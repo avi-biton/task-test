@@ -8,6 +8,7 @@ metadata:
     pipelinesascode.tekton.dev/max-keep-runs: "3"
     pipelinesascode.tekton.dev/on-cel-expression: event == "push" && target_branch
       == "main"
+    pipelinesascode.tekton.dev/task: managed/tkn-bundle/tkn-bundle-oci-ta.yaml
   creationTimestamp: null
   labels:
     appstudio.openshift.io/application: tasks
@@ -194,38 +195,15 @@ spec:
       params:
       - name: IMAGE
         value: $(params.output-image)
-      - name: DOCKERFILE
-        value: $(params.dockerfile)
       - name: CONTEXT
         value: $(params.path-context)
-      - name: HERMETIC
-        value: $(params.hermetic)
-      - name: PREFETCH_INPUT
-        value: $(params.prefetch-input)
-      - name: IMAGE_EXPIRES_AFTER
-        value: $(params.image-expires-after)
-      - name: COMMIT_SHA
-        value: $(tasks.clone-repository.results.commit)
-      - name: BUILD_ARGS
-        value:
-        - $(params.build-args[*])
-      - name: BUILD_ARGS_FILE
-        value: $(params.build-args-file)
       - name: SOURCE_ARTIFACT
-        value: $(tasks.prefetch-dependencies.results.SOURCE_ARTIFACT)
-      - name: CACHI2_ARTIFACT
-        value: $(tasks.prefetch-dependencies.results.CACHI2_ARTIFACT)
+        value: $(tasks.clone-repository.results.SOURCE_ARTIFACT)        
       runAfter:
       - prefetch-dependencies
       taskRef:
-        params:
-        - name: name
-          value: buildah-oci-ta
-        - name: bundle
-          value: quay.io/konflux-ci/tekton-catalog/task-buildah-oci-ta@sha256:fea2824c80f837ea8c201b4713f34f3e6952b61b7f0e9d3352d09eb0bfc111f8
-        - name: kind
-          value: task
-        resolver: bundles
+        name: tkn-bundle-oci-ta
+        kind: Task
       when:
       - input: $(tasks.init.results.build)
         operator: in
