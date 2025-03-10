@@ -30,4 +30,3 @@ spec:
         set -o pipefail
   
         echo "${STR}"
-        # comment
