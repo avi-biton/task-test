@@ -25,7 +25,7 @@ spec:
         tags:
         - "0.3"
       - name: yet-another-v01
-        repository: quay.io/avi_test/user-ns2/release-catalog/yet-another
+        repository: quay.io/avi_test/user-ns2/release-catalog/task-yet-another
         tags:
         - "0.1"
 
@@ -35,10 +35,10 @@ spec:
       resolver: git
       params:
         - name: url
-          value: "https://github.com/konflux-ci/release-service-catalog.git"
+          value: "https://github.com/avi-biton/release-service-catalog.git"
         - name: revision
-          value: 806af0c14399c7b2b4ef357e884d6cbcb255e5f9
+          value: release-test
         - name: pathInRepo
-          value: "pipelines/push-to-external-registry/push-to-external-registry.yaml"
+          value: "pipelines/managed/push-bundle-to-external-registry/push-bundle-to-external-registry.yaml"
     serviceAccountName: appstudio-pipeline
   policy: default
