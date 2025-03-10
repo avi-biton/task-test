@@ -223,33 +223,16 @@ spec:
         value: $(params.path-context)
       - name: SOURCE_ARTIFACT
         value: $(tasks.clone-repository.results.SOURCE_ARTIFACT)        
-      # - name: URL
-      #   value: $(params.git-url)
-      # - name: REVISION
-      #   value: $(params.revision)
-      # - name: SOURCE_CODE_DIR
-      #   value: source
       runAfter:
       - prefetch-dependencies
       taskRef:
         name: tkn-bundle-oci-ta
         kind: Task
-        # params:
-        # - name: name
-        #   value: tkn-bundle
-        # - name: bundle
-        #   value: quay.io/konflux-ci/tekton-catalog/task-tkn-bundle:0.1@sha256:b46acd4c6d713c7794e5105deca873327a2c92ca1705037728aa2cce4e41de49
-        # - name: kind
-        #   value: task
-        # resolver: bundles
       when:
       - input: $(tasks.init.results.build)
         operator: in
         values:
         - "true"
-      # workspaces:
-      # - name: source
-      #   workspace: workspace
     - name: build-image-index
       params:
         - name: IMAGE

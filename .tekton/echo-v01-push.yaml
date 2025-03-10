@@ -197,8 +197,8 @@ spec:
       #   value: $(params.git-url)
       # - name: REVISION
       #   value: $(params.revision)
-      - name: SOURCE_CODE_DIR
-        value: source
+      # - name: SOURCE_CODE_DIR
+      #   value: source
       runAfter:
       - prefetch-dependencies
       taskRef:
