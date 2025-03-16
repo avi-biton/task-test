@@ -31,7 +31,7 @@ spec:
     - name: SOURCE_CODE_DIR
       description: Source code directory in the working dir
       type: string
-      default: /source
+      default: source
     - name: STEPS_IMAGE
       description: An optional image to configure task steps with in the bundle
       type: string
@@ -52,7 +52,7 @@ spec:
       - name: HOME
         value: $(params.HOME)
       - name: SOURCE_CODE_DIR
-        value: $(params.SOURCE_CODE_DIR)
+        value: /$(params.SOURCE_CODE_DIR)
       - name: TASK_FILE
         value: tekton_task_files
     volumeMounts:
@@ -151,7 +151,7 @@ spec:
         set -o pipefail
         set -o nounset
         set -ex
-
+        
         mapfile -t FILES <"${TASK_FILE}"
         [[ ${#FILES[@]} -eq 0 ]] &&
           echo "No YAML files matched by \"$CONTEXT\" in \"/var/workdir${SOURCE_CODE_DIR}\", aborting the build" &&
