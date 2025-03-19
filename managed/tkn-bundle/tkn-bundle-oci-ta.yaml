@@ -31,7 +31,7 @@ spec:
     - name: SOURCE_CODE_DIR
       description: Source code directory in the working dir
       type: string
-      default: /source
+      default: ""
     - name: STEPS_IMAGE
       description: An optional image to configure task steps with in the bundle
       type: string
@@ -60,7 +60,7 @@ spec:
         name: workdir
   steps:
     - name: use-trusted-artifact
-      image: quay.io/redhat-appstudio/build-trusted-artifacts:latest@sha256:ff35e09ff5c89e54538b50abae241a765b2b7868f05d62c4835bebf0978f3659
+      image: quay.io/konflux-ci/build-trusted-artifacts:latest@sha256:23953da08db809f841120214055aeb238bc553368e366feb58495d5a5493b19a
       args:
         - use
         - $(params.SOURCE_ARTIFACT)=/var/workdir/source
@@ -94,11 +94,11 @@ spec:
             neg=1
             path="${path#\!}"
           fi
-          if [[ -d "/var/workdir${SOURCE_CODE_DIR}/${path}" ]]; then
+          if [[ -d "/var/workdir/source/${SOURCE_CODE_DIR}/${path}" ]]; then
             # for directories look for any .yaml or .yml files
             paths+=(
-              "/var/workdir${SOURCE_CODE_DIR}/${path}"/**/*.yaml
-              "/var/workdir${SOURCE_CODE_DIR}/${path}"/**/*.yml
+              "/var/workdir/source/${SOURCE_CODE_DIR}/${path}"/**/*.yaml
+              "/var/workdir/source/${SOURCE_CODE_DIR}/${path}"/**/*.yml
             )
           else
             # for files add the file to the collected paths
@@ -112,8 +112,8 @@ spec:
               # single negative path provided, first include everything then
               # subtract the negative elements
               FILES=(
-                "/var/workdir${SOURCE_CODE_DIR}"/**/*.yaml
-                "/var/workdir${SOURCE_CODE_DIR}"/**/*.yml
+                "/var/workdir/source/${SOURCE_CODE_DIR}"/**/*.yaml
+                "/var/workdir/source/${SOURCE_CODE_DIR}"/**/*.yml
               )
             fi
             for p in "${paths[@]}"; do
@@ -154,7 +154,7 @@ spec:
 
         mapfile -t FILES <"${TASK_FILE}"
         [[ ${#FILES[@]} -eq 0 ]] &&
-          echo "No YAML files matched by \"$CONTEXT\" in \"/var/workdir${SOURCE_CODE_DIR}\", aborting the build" &&
+          echo "No YAML files matched by \"$CONTEXT\" in \"/var/workdir/source/${SOURCE_CODE_DIR}\", aborting the build" &&
           exit 1
         exec 3>&1
 
