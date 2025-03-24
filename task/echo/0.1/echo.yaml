@@ -31,4 +31,3 @@ spec:
   
         echo "${STR}"
         # comment
-        # comment2
