@@ -33,11 +33,6 @@ spec:
   - name: REVISION
     type: string
     description: Revision
-  - name: SOURCE_CODE_DIR
-    type: string
-    description: Source code directory in the working dir
-    default: ""
-
   results:
   - description: Digest of the image just built
     name: IMAGE_DIGEST
@@ -52,8 +47,7 @@ spec:
     - name: TASK_FILE
       value: tekton_task_files
     - name: SOURCE_CODE_DIR
-      value: "$(params.SOURCE_CODE_DIR)"
-
+      value: source
   steps:
   - image: quay.io/konflux-ci/konflux-test:latest@sha256:d596724343a31c201a5c2e79f233f9ef78ac65726ae4ed5ffa41d76b3dac630f
     name: modify-task-files
@@ -62,7 +56,6 @@ spec:
       value: $(params.CONTEXT)
     - name: STEPS_IMAGE
       value: $(params.STEPS_IMAGE)
-
     script: |
       #!/bin/env bash
       set -o errexit
@@ -93,7 +86,7 @@ spec:
           )
         else
           # for files add the file to the collected paths
-          paths+=("${path}")
+          paths+=("$(workspaces.source.path)/${SOURCE_CODE_DIR}/${path}")
         fi
         if [[ $neg == 0 ]]; then
           # collect current paths to FILES
@@ -103,8 +96,8 @@ spec:
             # single negative path provided, first include everything then
             # subtract the negative elements
             FILES=(
-              "$(workspaces.source.path)"/${SOURCE_CODE_DIR}/**/*.yaml
-              "$(workspaces.source.path)"/${SOURCE_CODE_DIR}/**/*.yml
+              "$(workspaces.source.path)/${SOURCE_CODE_DIR}"/**/*.yaml
+              "$(workspaces.source.path)/${SOURCE_CODE_DIR}"/**/*.yml
             )
           fi
           for p in "${paths[@]}"; do
@@ -127,8 +120,6 @@ spec:
       fi
 
       printf "%s\n" "${FILES[@]}" > "${TASK_FILE}"
-
-      
     workingDir: $(workspaces.source.path)
   - image: quay.io/konflux-ci/appstudio-utils@sha256:4dd23978070d02c567303d46bef1f03bfc16d77aef62e6899ac2ac022884b4b5
     name: build
@@ -229,3 +220,4 @@ spec:
     workingDir: $(workspaces.source.path)
   workspaces:
   - name: source
+  
