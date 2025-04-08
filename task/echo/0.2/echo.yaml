@@ -9,8 +9,6 @@ metadata:
     tekton.dev/tags: echo, task, test
     artifacthub.io/provider: Avi
     artifacthub.io/category: integration-delivery
-  labels:
-    app.kubernetes.io/version: v0.2
 spec:
   description: >-
     Echo task for tests v2

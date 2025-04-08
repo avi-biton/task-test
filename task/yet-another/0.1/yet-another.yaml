@@ -10,7 +10,7 @@ metadata:
     artifacthub.io/provider: Avi
     artifacthub.io/category: integration-delivery
   labels:
-    app.kubernetes.io/version: v0.1
+    app.kubernetes.io/version: "0.1"
 spec:
   description: >-
     Yet Another Echo task for tests v1

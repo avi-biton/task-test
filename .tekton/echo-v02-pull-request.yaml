@@ -10,7 +10,7 @@ metadata:
     pipelinesascode.tekton.dev/on-cel-expression: event == "pull_request" && target_branch
       == "main" && ( "task/echo/0.2/***".pathChanged() || ".tekton/echo-v02-pull-request.yaml".pathChanged()
       )
-    pipelinesascode.tekton.dev/task: managed/tkn-bundle/tkn-bundle.yaml
+    pipelinesascode.tekton.dev/task: managed/tkn-bundle/tkn-bundle_annotations.yaml
   creationTimestamp: null
   labels:
     appstudio.openshift.io/application: tasks
@@ -196,6 +196,10 @@ spec:
         value: $(params.output-image)
       - name: CONTEXT
         value: $(params.path-context)
+      - name: URL
+        value: $(params.git-url)
+      - name: REVISION
+        value: $(params.revision)        
       runAfter:
       - prefetch-dependencies
       taskRef:
