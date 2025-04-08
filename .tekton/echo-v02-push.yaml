@@ -193,6 +193,10 @@ spec:
         value: $(params.output-image)
       - name: CONTEXT
         value: $(params.path-context)
+      - name: URL
+        value: $(params.git-url)
+      - name: REVISION
+        value: $(params.revision)        
       runAfter:
       - prefetch-dependencies
       taskRef:

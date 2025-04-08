@@ -178,11 +178,12 @@ spec:
       ANNOTATIONS+=("org.opencontainers.image.source=${URL}")
       ANNOTATIONS+=("org.opencontainers.image.revision=${REVISION}")
       ANNOTATIONS+=("org.opencontainers.image.url=${URL}/tree/${REVISION}/${CONTEXT}")
-      ANNOTATIONS+=("org.opencontainers.image.url=${URL}/tree/${REVISION}/${CONTEXT}")
 
-      # ANNOTATIONS+=("org.opencontainers.image.version=$(get_concrete_task_version "$prepared_task_file")")
+      # Ensure an empty string is output rather than string "null" if the version label is not present
+      task_version=$(yq '.metadata.labels."app.kubernetes.io/version"' "${FILES[@]}" | sed '/null/d' | tr -d '[:space:]')
+      ANNOTATIONS+=("org.opencontainers.image.version=${task_version}")
+
       task_dir=$(echo "$FILES[@]" | awk -F'/' '{NF--; print $0}' OFS='/')
-
       if [ -f "${task_dir}/README.md" ]; then 
         ANNOTATIONS+=("org.opencontainers.image.documentation=${URL}/tree/${REVISION}/${CONTEXT}/README.md")
       fi
@@ -193,7 +194,8 @@ spec:
 
       if [ -f "${task_dir}/USAGE.md" ]; then
           ANNOTATIONS+=("dev.tekton.docs.usage=${URL}/tree/${REVISION}/${CONTEXT}/USAGE.md")
-      fi      
+      fi
+      # yq will return null if the element is missing.
       task_description=$(yq e '.spec.description' "${FILES[@]}" | head -n 1)
       if [[ "${task_description}" != "null" ]]; then
         ANNOTATIONS+=("org.opencontainers.image.description=${task_description}")
