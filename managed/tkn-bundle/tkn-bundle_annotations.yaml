@@ -196,7 +196,7 @@ spec:
           ANNOTATIONS+=("dev.tekton.docs.usage=${URL}/tree/${REVISION}/${CONTEXT}/USAGE.md")
       fi
       # yq will return null if the element is missing.
-      task_description=$(yq e '.spec.description' "${FILES[@]}" | head -n 1)
+      task_description=$(yq e '.spec.description' "${FILES[@]}")
       if [[ "${task_description}" != "null" ]]; then
         ANNOTATIONS+=("org.opencontainers.image.description=${task_description}")
       fi
