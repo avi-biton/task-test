@@ -4,7 +4,7 @@ kind: Task
 metadata:
   name: first-task
   annotations:
-    tekton.dev/displayName: Yet Another Echo Task Test
+    tekton.dev/displayName: "first task"
     tekton.dev/pipelines.minVersion: "0.1"
     tekton.dev/tags: echo, task, test
     artifacthub.io/provider: Avi
@@ -13,7 +13,7 @@ metadata:
     app.kubernetes.io/version: "0.1"
 spec:
   description: >-
-    Yet Another Echo task for tests v1
+    First task for tests v1
   params:
     - name: mystr
       type: string
