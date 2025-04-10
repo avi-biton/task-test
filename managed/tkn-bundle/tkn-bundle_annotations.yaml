@@ -195,16 +195,8 @@ spec:
       if [ -f "${task_dir}/USAGE.md" ]; then
           ANNOTATIONS+=("dev.tekton.docs.usage=${URL}/tree/${REVISION}/${CONTEXT}/USAGE.md")
       fi
-      description=""
-      for file in "${FILES[@]}"; do
-          # Return empty value in case the value is null or not exist
-          task_description=$(yq e '.spec.description // ""' "$file")
-          # If there is a value, add space at the end of it
-          if [[ -n "$task_description" ]]; then
-              description+="$task_description\n"
-          fi
-      done
-      ANNOTATIONS+=("org.opencontainers.image.description=$(echo -e "${description}")")
+      description=$(yq '.spec.description' "${FILES[@]}" | sed '/null/d' | tr -d '')
+      ANNOTATIONS+=("org.opencontainers.image.description=${description}")
 
       ANNOTATION_FLAGS=()
       for annotation in "${ANNOTATIONS[@]}"; do
