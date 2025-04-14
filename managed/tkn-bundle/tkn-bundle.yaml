@@ -27,10 +27,13 @@ spec:
     type: string
     description: An optional image to configure task steps with in the bundle
     default: ""
+<<<<<<< Updated upstream
   - name: SOURCE_CODE_DIR
     type: string
     description: Source code directory in the working dir
     default: source
+=======
+>>>>>>> Stashed changes
   results:
   - description: Digest of the image just built
     name: IMAGE_DIGEST
@@ -59,7 +62,6 @@ spec:
       set -o errexit
       set -o pipefail
       set -o nounset
-      set -ex
 
       # expand '**', and don't return glob expression when no matches found
       shopt -s globstar nullglob
