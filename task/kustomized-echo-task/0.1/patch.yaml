@@ -1,0 +1,3 @@
+- op: replace
+  path: /metadata/labels/app.kubernetes.io~1version
+  value: "112233"
