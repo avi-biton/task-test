@@ -211,7 +211,7 @@ spec:
             echo "$prepared_task_file"
         }
         
-        task_dir=$(echo "${FILES[@]}" | awk -F'/' '{NF--; print $0}' OFS='/')
+        task_dir=$(echo "${FILES[0]}" | awk -F'/' '{NF--; print $0}' OFS='/')
 
         # If task is kustomized, generate it and replace the FILES value with the value of the generated task
         # All other files will be ignored.
