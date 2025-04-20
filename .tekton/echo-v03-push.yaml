@@ -9,7 +9,7 @@ metadata:
     pipelinesascode.tekton.dev/on-cel-expression: event == "push" && target_branch
       == "main" && ( "task/echo/0.3/***".pathChanged() || ".tekton/echo-v03-push.yaml".pathChanged()
       )
-    pipelinesascode.tekton.dev/task: managed/tkn-bundle/tkn-bundle_annotations.yaml
+    pipelinesascode.tekton.dev/task: managed/tkn-bundle/tkn-bundle.yaml
   creationTimestamp: null
   labels:
     appstudio.openshift.io/application: tasks
