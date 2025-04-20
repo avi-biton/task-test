@@ -79,7 +79,6 @@ spec:
         set -o errexit
         set -o pipefail
         set -o nounset
-        set -ex
 
         # expand '**', and don't return glob expression when no matches found
         shopt -s globstar nullglob
@@ -156,7 +155,6 @@ spec:
         set -o errexit
         set -o pipefail
         set -o nounset
-        set -ex
 
         mapfile -t FILES <"${TASK_FILE}"
         [[ ${#FILES[@]} -eq 0 ]] &&
@@ -192,7 +190,7 @@ spec:
           printf '"%s"' "$escaped_arg"
         }
 
-        # Check if the task is kustomized
+        # Check if task is kustomized
         # A task considered to be kustomized when a kustomization file is found in the task dir
         is_kustomized_task() {
             local -r task_dir=$1
@@ -210,8 +208,10 @@ spec:
             kubectl kustomize "$task_dir" >"$prepared_task_file"
             echo "$prepared_task_file"
         }
-        
-        task_dir=$(echo "${FILES[@]}" | awk -F'/' '{NF--; print $0}' OFS='/')
+
+        # task_dir is where all the tasks definitions resides
+        # all tasks definitions are in the same task_dir, so extracting it from the first element is enough
+        task_dir=$(echo "${FILES[0]}" | awk -F'/' '{NF--; print $0}' OFS='/')
 
         # If task is kustomized, generate it and replace the FILES value with the value of the generated task
         # All other files will be ignored.
@@ -231,7 +231,7 @@ spec:
         task_version=$(yq '.metadata.labels."app.kubernetes.io/version"' "${FILES[@]}" | sed '/null/d' | tr -d '[:space:]')
         ANNOTATIONS+=("org.opencontainers.image.version=${task_version}")
 
-        task_dir=$(echo "${FILES[@]}" | awk -F'/' '{NF--; print $0}' OFS='/')
+
         if [ -f "${task_dir}/README.md" ]; then
           ANNOTATIONS+=("org.opencontainers.image.documentation=${URL}/tree/${REVISION}/${CONTEXT}/README.md")
         fi
