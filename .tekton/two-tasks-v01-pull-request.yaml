@@ -11,7 +11,7 @@ metadata:
     pipelinesascode.tekton.dev/on-cel-expression: event == "pull_request" && target_branch
       == "main" && ( "task/two-tasks/0.1/***".pathChanged() || ".tekton/two-tasks-v01-pull-request.yaml".pathChanged()
       )
-    pipelinesascode.tekton.dev/task: managed/tkn-bundle/tkn-bundle_annotations.yaml
+    pipelinesascode.tekton.dev/task: managed/tkn-bundle/tkn-bundle.yaml
   creationTimestamp: null
   labels:
     appstudio.openshift.io/application: tasks
