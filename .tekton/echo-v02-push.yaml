@@ -8,7 +8,8 @@ metadata:
     pipelinesascode.tekton.dev/cancel-in-progress: "false"
     pipelinesascode.tekton.dev/max-keep-runs: "3"
     pipelinesascode.tekton.dev/on-cel-expression: event == "push" && target_branch
-      == "main"
+      == "main" && ( "task/echo/0.2/***".pathChanged() || ".tekton/echo-v02-push.yaml".pathChanged()
+      )
   creationTimestamp: null
   labels:
     appstudio.openshift.io/application: tasks
@@ -23,7 +24,7 @@ spec:
   - name: revision
     value: '{{revision}}'
   - name: output-image
-    value: quay.io/avi_test/user-ns2/echo-v02:{{revision}}
+    value: quay.io/avi_test/user-ns2/pull-request-task-bundles/echo-v02:{{revision}}
   - name: dockerfile
     value: Dockerfile
   - name: path-context
